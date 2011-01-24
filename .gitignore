@@ -1,0 +1,6 @@
+bin/
+out/
+lib/
+.metadata/
+*.*ar
+*.orig*
