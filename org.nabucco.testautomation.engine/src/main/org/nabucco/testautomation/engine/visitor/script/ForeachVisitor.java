@@ -25,7 +25,6 @@ import org.nabucco.testautomation.engine.base.util.PropertyHelper;
 import org.nabucco.testautomation.engine.exception.BreakLoopException;
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
-
 import org.nabucco.testautomation.facade.datatype.property.base.Property;
 import org.nabucco.testautomation.facade.datatype.property.base.PropertyComposite;
 import org.nabucco.testautomation.result.facade.datatype.TestScriptResult;
@@ -38,7 +37,6 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Logger;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Loop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.PropertyAction;
-import org.nabucco.testautomation.script.facade.datatype.dictionary.TestScript;
 
 /**
  * ForeachVisitor
@@ -174,14 +172,6 @@ public class ForeachVisitor extends AbstractTestScriptVisitor<TestScriptResult> 
     @Override
     public void visit(PropertyAction propertyAction, TestScriptResult argument) throws TestScriptException {
     	new PropertyActionVisitor(getContext(), getTestScriptEngine()).visit(propertyAction, argument);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void visit(TestScript testScript, TestScriptResult argument, boolean subTestScript) throws TestScriptException {
-    	new SubTestScriptVisitor(getContext(), getTestScriptEngine()).visit(testScript, argument);
     }
     
     static class PropertyIterator implements Iterable<Property> {

@@ -16,10 +16,13 @@
 */
 package org.nabucco.testautomation.engine.visitor.result;
 
+import org.nabucco.framework.base.facade.datatype.Data;
 import org.nabucco.framework.base.facade.datatype.Identifier;
 import org.nabucco.framework.base.facade.datatype.image.ImageData;
+import org.nabucco.testautomation.engine.proxy.cache.DataCache;
 import org.nabucco.testautomation.engine.proxy.cache.ImageCache;
 
+import org.nabucco.testautomation.result.facade.datatype.trace.FileTrace;
 import org.nabucco.testautomation.result.facade.datatype.trace.ScreenshotTrace;
 import org.nabucco.testautomation.result.facade.datatype.visitor.TestResultVisitor;
 
@@ -37,6 +40,17 @@ public class TestResultFinalizationVisitor extends TestResultVisitor {
 			ImageData image = ImageCache.getInstance().remove(datatype.getImageId());
 			datatype.setScreenshot(image);
 			datatype.setImageId((Identifier) null);
+		}		
+		super.visit(datatype);
+	}
+	
+	@Override
+	protected void visit(FileTrace datatype) {
+		
+		if (datatype != null && datatype.getFileId() != null) {
+			Data data = DataCache.getInstance().remove(datatype.getFileId());
+			datatype.setFileContent(data);
+			datatype.setFileId((Identifier) null);
 		}		
 		super.visit(datatype);
 	}

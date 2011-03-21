@@ -19,10 +19,11 @@ package org.nabucco.testautomation.engine.visitor.script;
 import org.nabucco.testautomation.engine.base.context.TestContext;
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
-
 import org.nabucco.testautomation.result.facade.datatype.TestScriptResult;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Action;
+import org.nabucco.testautomation.script.facade.datatype.dictionary.EmbeddedTestScript;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Execution;
+import org.nabucco.testautomation.script.facade.datatype.dictionary.Logger;
 
 /**
  * ExecutionVisitor
@@ -60,6 +61,23 @@ public class ExecutionVisitor extends AbstractTestScriptVisitor<TestScriptResult
     public void visit(Action action, TestScriptResult argument) throws TestScriptException {
         new ActionVisitor(getContext(), getTestScriptEngine()).visit(action,
                 argument);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void visit(Logger logger, TestScriptResult argument) throws TestScriptException {
+        new LoggerVisitor(getContext(), getTestScriptEngine()).visit(logger,
+                argument);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void visit(EmbeddedTestScript testScript, TestScriptResult argument) throws TestScriptException {
+    	new EmbeddedTestScriptVisitor(getContext(), getTestScriptEngine()).visit(testScript, argument);
     }
 
 }

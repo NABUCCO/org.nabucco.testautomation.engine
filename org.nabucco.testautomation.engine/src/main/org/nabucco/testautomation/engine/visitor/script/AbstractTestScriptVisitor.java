@@ -16,21 +16,17 @@
 */
 package org.nabucco.testautomation.engine.visitor.script;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.nabucco.testautomation.engine.base.context.TestContext;
 import org.nabucco.testautomation.engine.base.engine.ExecutionController;
-import org.nabucco.testautomation.engine.base.logging.NBCTestLogger;
-import org.nabucco.testautomation.engine.base.logging.NBCTestLoggingFactory;
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
-
-import org.nabucco.testautomation.script.facade.datatype.comparator.TestScriptElementSorter;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Action;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Assertion;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.BreakLoop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Condition;
+import org.nabucco.testautomation.script.facade.datatype.dictionary.EmbeddedTestScript;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Execution;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Foreach;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
@@ -49,9 +45,6 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.base.TestScr
  * @author Steffen Schmidt, PRODYNA AG
  */
 public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisitor<A> {
-
-    private static final NBCTestLogger log = NBCTestLoggingFactory.getInstance().getLogger(
-            AbstractTestScriptVisitor.class);
 
     private TestContext context;
 
@@ -135,10 +128,8 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
      * {@inheritDoc}
      */
     @Override
-    public void visit(TestScript script, A argument, boolean subTestScript) throws TestScriptException {
-    	checkExecutionController();
-        log.info("Visiting TestScript '", script.getTestScriptKey().getValue(), "'");
-        visit(script.getTestScriptElementList(), argument);
+    public void visit(EmbeddedTestScript script, A argument) throws TestScriptException {
+        visit(script.getTestScript(), argument);
     }
     
     /**
@@ -147,7 +138,6 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
     @Override
     public void visit(TestScript script, A argument) throws TestScriptException {
     	checkExecutionController();
-        log.info("Visiting TestScript '", script.getTestScriptKey().getValue(), "'");
         visit(script.getTestScriptElementList(), argument);
     }
 
@@ -194,7 +184,6 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
      * @throws TestScriptException thrown, if an error occurs during the visit
      */
     public void visit(List<TestScriptElementContainer> list, A argument) throws TestScriptException {
-    	Collections.sort(list, new TestScriptElementSorter());
 
     	for (TestScriptElementContainer e : list) {
             visit(e.getElement(), argument);
@@ -211,8 +200,8 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
     public void visit(TestScriptElement element, A argument) throws TestScriptException {
         TestScriptElementType type = element.getType();
         switch (type) {
-            case SCRIPT: {
-                visit((TestScript) element, argument, true);
+            case EMBEDDED_SCRIPT: {
+            	visit((EmbeddedTestScript) element, argument);
                 break;
             }
             case LOGGER: {
@@ -280,6 +269,10 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
         return testScriptEngine;
     }
     
+    /**
+     * Checks, if a pause or interruption is requested
+     * for the execution of the current TestConfiguration.
+     */
     protected void checkExecutionController() {
 		ExecutionController executionController = context.getExecutionController();
 

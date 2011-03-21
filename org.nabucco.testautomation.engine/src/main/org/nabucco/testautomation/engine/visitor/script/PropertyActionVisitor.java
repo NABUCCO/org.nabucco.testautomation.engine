@@ -16,6 +16,7 @@
 */
 package org.nabucco.testautomation.engine.visitor.script;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -64,6 +65,8 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.type.Propert
 public class PropertyActionVisitor extends
 		AbstractTestScriptVisitor<TestScriptResult> {
 
+	private static final String EMPTY_STRING = "";
+
 	private static final NBCTestLogger logger = NBCTestLoggingFactory
 			.getInstance().getLogger(PropertyActionVisitor.class);
 	
@@ -108,8 +111,300 @@ public class PropertyActionVisitor extends
 		case SET:
 			set(propertyAction);
 			break;
+		case SIZE_OF:
+			sizeOf(propertyAction);
+			break;
+		case CONCAT:
+			concat(propertyAction);
+			break;
+		case ADD:
+			add(propertyAction);
+			break;
+		case SUBTRACT:
+			subtract(propertyAction);
+			break;
+		case LENGTH:
+			length(propertyAction);
+			break;
 		default:
 			throw new PropertyActionException("Unsupported PropertyActionType: " + action);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param propertyAction
+	 * @throws PropertyActionException
+	 */
+	private void length(PropertyAction propertyAction) throws PropertyActionException {
+		
+		PropertyReference propertyRef = propertyAction.getPropertyRef();
+		PropertyReference targetRef = propertyAction.getTarget();
+
+		if (targetRef == null || targetRef.getValue() == null) {
+			throw new PropertyActionException("No Target defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		if (propertyRef == null || propertyRef.getValue() == null) {
+			throw new PropertyActionException("No Property Reference defined in PropertyAction '" + propertyAction + "'");
+		}
+		
+		logger.debug("Resolving PropertyRef '" + propertyRef.getValue() + "'");
+		Property property = getContext().getProperty(propertyRef.getValue());
+		
+		if (property == null) {
+			throw new PropertyActionException("PropertyAction LENGTH: no Property found in TestContext for NameRef: '"
+					+ propertyRef.getValue());
+		}
+		
+		int length = PropertyHelper.toString(property).length();
+		Property resultProp = PropertyHelper.createIntegerProperty(targetRef.getValue(), length);
+		this.getContext().put(resultProp);
+	}
+	
+	/**
+	 * 
+	 * @param propertyAction
+	 * @throws PropertyActionException
+	 */
+	private void add(PropertyAction propertyAction) throws PropertyActionException {
+		
+		PropertyReference propertyRef = propertyAction.getPropertyRef();
+		PropertyReference targetRef = propertyAction.getTarget();
+
+		if (targetRef == null || targetRef.getValue() == null) {
+			throw new PropertyActionException("No Target defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		if (propertyRef == null || propertyRef.getValue() == null) {
+			throw new PropertyActionException("No Property Reference defined in PropertyAction '" + propertyAction + "'");
+		}
+		
+		logger.debug("Resolving PropertyRef '" + propertyRef.getValue() + "'");
+		Property property = getContext().getProperty(propertyRef.getValue());
+
+		if (property == null) {
+			throw new PropertyActionException("PropertyAction SUBTRACT: no Property found in TestContext for NameRef: '"
+					+ propertyRef.getValue());
+		}
+		
+		if (propertyAction.getValue() == null || propertyAction.getValue().getValue() == null) {
+			throw new PropertyActionException("No Value defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		try {
+			BigDecimal a = new BigDecimal(PropertyHelper.toString(property));
+			BigDecimal b = null;
+			Property valueProp = this.getContext().getProperty(propertyAction.getValue().getValue());
+			
+			if (valueProp == null) {
+				b = new BigDecimal(propertyAction.getValue().getValue());
+			} else {
+				b = new BigDecimal(PropertyHelper.toString(valueProp));
+			}
+			
+			BigDecimal result = a.add(b);
+			logger.info("Addition: " + a.toString() + " + " + b.toString() + " = " + result.toString());
+			Property resultProp = null;
+			
+			if (result.scale() == 0) {
+				resultProp = PropertyHelper.createIntegerProperty(targetRef.getValue(), result.intValue());
+			} else {
+				resultProp = PropertyHelper.createDoubleProperty(targetRef.getValue(), result.doubleValue());
+			}
+				
+			this.getContext().put(resultProp);
+		} catch (NumberFormatException ex) {
+			throw new PropertyActionException(
+					"NumberFormatException in PropertyAction '"
+							+ propertyAction.getName().getValue() + "'");
+		}
+	}
+
+	/**
+	 * 
+	 * @param propertyAction
+	 * @throws PropertyActionException
+	 */
+	private void subtract(PropertyAction propertyAction) throws PropertyActionException {
+		
+		PropertyReference propertyRef = propertyAction.getPropertyRef();
+		PropertyReference targetRef = propertyAction.getTarget();
+
+		if (targetRef == null || targetRef.getValue() == null) {
+			throw new PropertyActionException("No Target defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		if (propertyRef == null || propertyRef.getValue() == null) {
+			throw new PropertyActionException("No Property Reference defined in PropertyAction '" + propertyAction + "'");
+		}
+		
+		logger.debug("Resolving PropertyRef '" + propertyRef.getValue() + "'");
+		Property property = getContext().getProperty(propertyRef.getValue());
+
+		if (property == null) {
+			throw new PropertyActionException("PropertyAction SUBTRACT: no Property found in TestContext for NameRef: '"
+					+ propertyRef.getValue());
+		}
+		
+		if (propertyAction.getValue() == null || propertyAction.getValue().getValue() == null) {
+			throw new PropertyActionException("No Value defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		try {
+			BigDecimal a = new BigDecimal(PropertyHelper.toString(property));
+			BigDecimal b = null;
+			Property valueProp = this.getContext().getProperty(propertyAction.getValue().getValue());
+			
+			if (valueProp == null) {
+				b = new BigDecimal(propertyAction.getValue().getValue());
+			} else {
+				b = new BigDecimal(PropertyHelper.toString(valueProp));
+			}
+			
+			BigDecimal result = a.subtract(b);
+			logger.info("Subtraction: " + a.toString() + " + " + b.toString() + " = " + result.toString());
+			Property resultProp = null;
+			
+			if (result.scale() == 0) {
+				resultProp = PropertyHelper.createIntegerProperty(targetRef.getValue(), result.intValue());
+			} else {
+				resultProp = PropertyHelper.createDoubleProperty(targetRef.getValue(), result.doubleValue());
+			}
+				
+			this.getContext().put(resultProp);
+		} catch (NumberFormatException ex) {
+			throw new PropertyActionException(
+					"NumberFormatException in PropertyAction '"
+							+ propertyAction.getName().getValue() + "'");
+		}
+	}
+	
+	/**
+	 * Concatenates the StringValue of the Property referenced by Property Reference and
+	 * the StringValue of the Property referenced by Value or just Value as string, if no
+	 * Property is found.
+	 * 
+	 * @param propertyAction
+	 * @throws PropertyActionException
+	 */
+	private void concat(PropertyAction propertyAction) throws PropertyActionException {
+		
+		PropertyReference propertyRef = propertyAction.getPropertyRef();
+		PropertyReference targetRef = propertyAction.getTarget();
+
+		if (targetRef == null || targetRef.getValue() == null) {
+			throw new PropertyActionException("No Target defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		if (propertyRef == null || propertyRef.getValue() == null) {
+			throw new PropertyActionException("No Property Reference defined in PropertyAction '" + propertyAction + "'");
+		}
+		
+		logger.debug("Resolving PropertyRef '" + propertyRef.getValue() + "'");
+		Property property = getContext().getProperty(propertyRef.getValue());
+
+		if (property == null) {
+			throw new PropertyActionException("PropertyAction CONCAT: no Property found in TestContext for NameRef: '"
+					+ propertyRef.getValue());
+		}
+		
+		if (propertyAction.getValue() == null || propertyAction.getValue().getValue() == null) {
+			throw new PropertyActionException("No Value defined in PropertyAction '" + propertyAction + "'");
+		}
+			
+		String arg1 = PropertyHelper.toString(property);
+		String arg2 = EMPTY_STRING;
+		Property valueProp = this.getContext().getProperty(propertyAction.getValue().getValue());
+		
+		if (valueProp == null) {
+			arg2 = propertyAction.getValue().getValue();
+		} else {
+			arg2 = PropertyHelper.toString(valueProp);
+		}
+		
+		if (arg1 == null) {
+			arg1 = EMPTY_STRING;
+		}
+		
+		if (arg2 == null) {
+			arg2 = EMPTY_STRING;
+		}
+		
+		String concatenation = arg1.concat(arg2);
+		Property targetProp = getContext().getProperty(targetRef.getValue());
+		
+		if (targetProp == null) {
+			this.getContext().put(PropertyHelper.createStringProperty(targetRef.getValue(), concatenation));
+		} else {
+			
+			switch (targetProp.getType()) {
+			case STRING:
+				((StringProperty) targetProp).setValue(concatenation);
+				break;
+			case XML:
+				((XmlProperty) targetProp).setValue(concatenation);
+				break;
+			case XPATH:
+				((XPathProperty) targetProp).setValue(concatenation);
+				break;
+			case SQL:
+				((SqlProperty) targetProp).setValue(concatenation);
+				break;
+			default:
+				throw new PropertyActionException("Illegal PropertyType for PropertyAction CONCAT: " + targetProp.getType());
+			}
+		}
+	}
+	
+	/**
+	 * Determines the Property referenced by Property Reference. If List or XPath, 
+	 * the number of children is set in an IntegerProperty with the name defined in Target,
+	 * otherwise 1 or 0, if the referenced Property is null.
+	 * 
+	 * @param propertyAction
+	 * @throws PropertyActionException
+	 */
+	private void sizeOf(PropertyAction propertyAction) throws PropertyActionException {
+		
+		PropertyReference propertyRef = propertyAction.getPropertyRef();
+		PropertyReference targetRef = propertyAction.getTarget();
+
+		if (targetRef == null || targetRef.getValue() == null) {
+			throw new PropertyActionException("No Target defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		if (propertyRef == null || propertyRef.getValue() == null) {
+			throw new PropertyActionException("No Property Reference defined in PropertyAction '" + propertyAction + "'");
+		}
+
+		logger.debug("Resolving PropertyRef '" + propertyRef.getValue() + "'");
+		Property property = getContext().getProperty(propertyRef.getValue());
+
+		if (property == null) {
+			getContext().put(PropertyHelper.createIntegerProperty(targetRef.getValue(), 0));
+			return;
+		}
+		
+		switch (property.getType()) {
+		case LIST: {
+			int size = ((PropertyList) property).getPropertyList().size();
+			logger.info("Size of '" + property.getName().getValue() + "': " + size);
+			getContext().put(PropertyHelper.createIntegerProperty(targetRef.getValue(), size));
+			break;
+		}
+		case XPATH: {
+			int size = ((XPathProperty) property).getPropertyList().size();
+			logger.info("Size of '" + property.getName().getValue() + "': " + size);
+			getContext().put(PropertyHelper.createIntegerProperty(targetRef.getValue(), size));
+			break;
+		}
+		default: {
+			int size = 1;
+			logger.info("Size of '" + property.getName().getValue() + "': " + size);
+			getContext().put(PropertyHelper.createIntegerProperty(targetRef.getValue(), size));
+			break;
+		}
 		}
 	}
 
@@ -291,7 +586,7 @@ public class PropertyActionVisitor extends
 					+ propertyRef.getValue());
 		}
 
-		String value = propertyAction.getValue() != null ? propertyAction.getValue().getValue() : "";
+		String value = propertyAction.getValue() != null ? propertyAction.getValue().getValue() : EMPTY_STRING;
 
 		if (value == null) {
 			throw new PropertyActionException("No value to set defined in PropertyAction SET");

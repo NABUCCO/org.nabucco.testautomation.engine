@@ -16,13 +16,17 @@
 */
 package org.nabucco.testautomation.engine.launcher;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.rmi.NotBoundException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.nabucco.testautomation.engine.TestEngine;
 import org.nabucco.testautomation.engine.TestEngineFactory;
@@ -33,7 +37,6 @@ import org.nabucco.testautomation.engine.deploy.Deployer;
 import org.nabucco.testautomation.engine.execution.TestExecutionService;
 import org.nabucco.testautomation.engine.execution.TestExecutionServiceFactory;
 import org.nabucco.testautomation.engine.launcher.exception.LaunchingException;
-
 import org.nabucco.testautomation.facade.exception.engine.TestEngineException;
 
 /**
@@ -48,6 +51,10 @@ public class TestEngineLauncher {
 			.getInstance().getLogger(TestEngineLauncher.class);
 
 	private static final String DEPLOY_PATH = "./deploy";
+	
+	private static final Lock lock = new ReentrantLock();
+	
+	private static final Condition delay = lock.newCondition();
 
 	private int port;
 
@@ -195,15 +202,25 @@ public class TestEngineLauncher {
 		}
 
 		// Get commands
-		LineNumberReader in = new LineNumberReader(new InputStreamReader(
-				System.in));
 		String command = null;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		try {
 			while (true) {
 				command = in.readLine();
 				
-				if (command.equals("stop")) {
+				if (command == null || command.equals("")) {
+					// Fix for Unix/Linux: wait without any CPU-load
+					try {
+						lock.lock();
+						delay.await(5000, TimeUnit.MILLISECONDS);
+					} catch (InterruptedException e) {
+						logger.error("Unexpected interruption");
+					} finally {
+						lock.unlock();
+					}
+					continue;
+				} else if (command.equals("stop")) {
 					break;
 				} else if (command.equals("pause")) {
 					launcher.pause();
@@ -212,7 +229,7 @@ public class TestEngineLauncher {
 				} else if (command.equals("resume")) {
 					launcher.resume();
 				} else {
-					logger.warning("Unknown command");
+					logger.warning("Unknown command: " + command);
 				}
 			}
 		} catch (IOException ex) {
@@ -220,7 +237,7 @@ public class TestEngineLauncher {
 		}
 		System.exit(0);
 	}
-
+	
 	private static void printUsage() {
 		System.out.println("Usage:");
 		System.out.println("TestEngineLauncher <port> <bindingName>");

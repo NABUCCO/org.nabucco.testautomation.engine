@@ -17,6 +17,8 @@
 package org.nabucco.testautomation.engine.visitor.script;
 
 import org.nabucco.testautomation.engine.base.context.TestContext;
+import org.nabucco.testautomation.engine.base.logging.NBCTestLogger;
+import org.nabucco.testautomation.engine.base.logging.NBCTestLoggingFactory;
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
 
@@ -38,6 +40,9 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.TestScript;
  */
 public class TestScriptVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
 
+	private static final NBCTestLogger logger = NBCTestLoggingFactory.getInstance().getLogger(
+			TestScriptVisitor.class);
+	
     /**
      * Constructs a new TestScriptVisitor instance using the given {@link TestContext} and
      * {@link TestScriptEngine}.
@@ -51,8 +56,13 @@ public class TestScriptVisitor extends AbstractTestScriptVisitor<TestScriptResul
 		super(context, testScriptEngine);
 	}
 	
+	/**
+     * {@inheritDoc}
+     */
 	public void visit(TestScript script, TestScriptResult argument) throws TestScriptException {
+		logger.info("Visiting TestScript '", script.getIdentificationKey().getValue(), "'");
 		super.visit(script, argument);
+		logger.info("Finished visiting TestScript '", script.getIdentificationKey().getValue(), "'");
 	}
 	
 	/**
@@ -119,12 +129,4 @@ public class TestScriptVisitor extends AbstractTestScriptVisitor<TestScriptResul
     	new PropertyActionVisitor(getContext(), getTestScriptEngine()).visit(propertyAction, argument);
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void visit(TestScript testScript, TestScriptResult argument, boolean subTestScript) throws TestScriptException {
-    	new SubTestScriptVisitor(getContext(), getTestScriptEngine()).visit(testScript, argument);
-    }
-	
 }

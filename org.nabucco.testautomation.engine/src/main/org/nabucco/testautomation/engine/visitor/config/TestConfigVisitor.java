@@ -18,6 +18,7 @@ package org.nabucco.testautomation.engine.visitor.config;
 
 import org.nabucco.testautomation.config.facade.datatype.TestConfigElement;
 import org.nabucco.testautomation.config.facade.datatype.TestConfiguration;
+import org.nabucco.testautomation.engine.base.context.TestContext;
 
 /**
  * TestConfigVisitor
@@ -32,7 +33,7 @@ public interface TestConfigVisitor<A> {
      * @param testConfiguration
      * @param argument
      */
-    void visit(TestConfiguration testConfiguration, A argument);
+    void visit(TestConfiguration testConfiguration, TestContext context, A argument);
     
     /**
      * Visits the given TestConfigElement.
@@ -40,6 +41,6 @@ public interface TestConfigVisitor<A> {
      * @param testConfigElement the TestConfigElement
      * @param argument an argument
      */
-    void visit(TestConfigElement testConfigElement, A argument);
+    void visit(TestConfigElement testConfigElement, TestContext context, A argument);
     
 }

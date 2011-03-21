@@ -68,7 +68,7 @@ public class ActionVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
 			argument.setStatus(TestScriptStatusType.FAILED);
 			String msg = "No ActionResponse received for Action '"
 					+ action.getName().getValue() + "' "
-					+ action.getActionId().getValue();
+					+ action.getIdentificationKey().getValue();
 			argument.setErrorMessage(msg);
 			logger.error(msg);
 			return;
@@ -80,8 +80,11 @@ public class ActionVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
         ActionTrace actionTrace = response.getActionTrace();
 		
         if (actionTrace != null) {
-        	actionTrace.setName(action.getName());
-        	actionTrace.setActionId(action.getActionId());
+        	
+        	if (actionTrace.getName() == null || actionTrace.getName().getValue() == null) {
+        		actionTrace.setName(action.getName());
+        	}
+        	actionTrace.setActionId(action.getIdentificationKey());
         	argument.getActionTraceList().add(actionTrace);
         }
         

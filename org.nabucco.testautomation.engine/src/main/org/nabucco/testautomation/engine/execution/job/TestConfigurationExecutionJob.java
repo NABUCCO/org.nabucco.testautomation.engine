@@ -48,6 +48,11 @@ import org.nabucco.testautomation.result.facade.datatype.status.TestConfiguratio
  */
 public class TestConfigurationExecutionJob extends TestExecutionJob {
 
+	/**
+	 * 
+	 */
+	private static final String RESULT_SUFFIX = "-Result";
+
 	private static final long serialVersionUID = 1L;
 
 	private static final NBCTestLogger logger = NBCTestLoggingFactory
@@ -180,27 +185,32 @@ public class TestConfigurationExecutionJob extends TestExecutionJob {
 	protected void prepareExecution() {
 
 		// initialize and prepare the TestConfigurationResult
+		String resultName = testConfiguration.getName().getValue() + RESULT_SUFFIX;
 		testConfigurationResult = TestResultHelper.createTestConfigurationResult();
-		testConfigurationResult.setName(testConfiguration.getName().getValue() + "-Result");
+		testConfigurationResult.setName(resultName);
 		testConfigurationResult.setTestConfigurationId(testConfiguration.getId());
 		testConfigurationResult.setTestConfigurationName(testConfiguration.getName());
+		logger.debug("TestConfigurationResult initialized and prepared. Name: ", resultName);
 		
 		// initialize TestContext
 		context.setExecutionController(this);
 		context.setTestConfigurationResult(testConfigurationResult);
+		logger.debug("TestContext initialized");
 		
 		ProxyEnginePool proxyPool = ProxyPoolFactory.getInstance()
 				.getProxyEnginePool();
 		Collection<ProxyEngine> proxies = proxyPool.getProxyEngines();
 
-		// configure and start all proxies with the current configuration
+		// configure and start all proxies with configurations from TestContext
+		logger.debug("Configuring and starting all ProxyEngines");
+		
 		for (ProxyEngine proxyEngine : proxies) {
 			ProxyConfiguration config = context
 					.getProxyConfiguration(proxyEngine.getSubEngineType());
 
 			if (config == null) {
-				logger.error("No configuration found in TestContext for "
-						+ proxyEngine.getSubEngineType());
+				logger.warning("No ProxyConfiguration found in TestContext for SubEngineType ",
+						proxyEngine.getSubEngineType().toString(), ". Proxy DISABLED !");
 				continue;
 			}
 			try {
@@ -211,6 +221,7 @@ public class TestConfigurationExecutionJob extends TestExecutionJob {
 						+ proxyEngine.getSubEngineType());
 			}
 		}
+		logger.debug("ProxyEngines configured and started");
 	}
 
 	/**
@@ -223,15 +234,17 @@ public class TestConfigurationExecutionJob extends TestExecutionJob {
 		
 		try {
 			// Start the execution of the TestConfiguration
-			TestConfigurationVisitor visitor = new TestConfigurationVisitor(context, new TestConfigElementEngineImpl());
+			logger.debug("Starting execution of TestConfiguration ", testConfiguration.getName().getValue());
+			TestConfigurationVisitor visitor = new TestConfigurationVisitor(new TestConfigElementEngineImpl());
 			testConfigurationResult.setStatus(TestConfigurationStatusType.RUNNING);
 			start = System.currentTimeMillis();
 			testConfigurationResult.setStartTime(new Date(start));
-			visitor.visit(testConfiguration, testConfigurationResult);
+			visitor.visit(testConfiguration, context, testConfigurationResult);
 			end = System.currentTimeMillis();
 			testConfigurationResult.setEndTime(new Date(end));
 			testConfigurationResult.setDuration(end - start);
 			testConfigurationResult.setStatus(TestConfigurationStatusType.FINISHED);
+			logger.debug("Finished execution of TestConfiguration ", testConfiguration.getName().getValue());
 		} catch (InterruptionException ex) {
 			end = System.currentTimeMillis();
 			testConfigurationResult.setEndTime(new Date(end));
@@ -246,11 +259,14 @@ public class TestConfigurationExecutionJob extends TestExecutionJob {
 	 */
 	@Override
 	protected void finalizeExecution() {
+		logger.debug("Finalizing execution of TestConfiguration ", testConfiguration.getName().getValue());
 		ProxyEnginePool proxyPool = ProxyPoolFactory.getInstance()
 				.getProxyEnginePool();
 		Collection<ProxyEngine> proxies = proxyPool.getProxyEngines();
 
 		// stop and unconfigure all proxies
+		logger.debug("Stopping and unconfiguring all ProxyEngines");
+		
 		for (ProxyEngine proxyEngine : proxies) {
 			try {
 				proxyEngine.stopProxy();
@@ -260,6 +276,7 @@ public class TestConfigurationExecutionJob extends TestExecutionJob {
 						+ proxyEngine.getSubEngineType());
 			}
 		}
+		logger.debug("ProxyEngines stopped and unconfigured");
 	}
 
 }

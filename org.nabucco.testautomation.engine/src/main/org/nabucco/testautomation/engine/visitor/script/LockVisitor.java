@@ -24,7 +24,6 @@ import org.nabucco.testautomation.engine.exception.SynchronizationSemaphoreExcep
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.semaphore.SynchronizationSemaphoreMap;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
-
 import org.nabucco.testautomation.result.facade.datatype.TestScriptResult;
 import org.nabucco.testautomation.result.facade.datatype.status.TestScriptStatusType;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Assertion;
@@ -35,7 +34,6 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Logger;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Loop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.PropertyAction;
-import org.nabucco.testautomation.script.facade.datatype.dictionary.TestScript;
 
 /**
  * LockVisitor
@@ -138,12 +136,4 @@ public class LockVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
     	new PropertyActionVisitor(getContext(), getTestScriptEngine()).visit(propertyAction, argument);
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void visit(TestScript testScript, TestScriptResult argument, boolean subTestScript) throws TestScriptException {
-    	new SubTestScriptVisitor(getContext(), getTestScriptEngine()).visit(testScript, argument);
-    }
-
 }

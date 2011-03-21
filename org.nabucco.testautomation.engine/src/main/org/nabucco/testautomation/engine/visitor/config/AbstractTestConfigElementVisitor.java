@@ -37,8 +37,6 @@ public abstract class AbstractTestConfigElementVisitor<A> implements TestConfigV
 
 	private static final TestConfigElementSorter sorter = new TestConfigElementSorter();
 	
-    private TestContext context;
-    
     private TestConfigElementEngine testConfigElementEngine;
 
     /**
@@ -47,30 +45,20 @@ public abstract class AbstractTestConfigElementVisitor<A> implements TestConfigV
      * @param context the TestContext
      * @param testStepEngine the TestConfigElementEngine
      */
-    AbstractTestConfigElementVisitor(TestContext context, TestConfigElementEngine testStepEngine) {
-    	this.context = context;
+    AbstractTestConfigElementVisitor(TestConfigElementEngine testStepEngine) {
     	this.testConfigElementEngine = testStepEngine;
     }
     
-    public void visit(TestConfigElement testConfigElement, TestResult argument) {
+    public void visit(TestConfigElement testConfigElement, TestContext context, TestResult argument) {
     	
         List<TestConfigElementContainer> testConfigElementList = testConfigElement.getTestConfigElementList();
         Collections.sort(testConfigElementList, sorter);
         
 		for (TestConfigElementContainer child : testConfigElementList) {
-            visit(child.getElement(), argument);
+            visit(child.getElement(), context, argument);
         }
     }
     
-    /**
-     * Gets the TestContext used by this Visitor.
-     * 
-     * @return the TestContext
-     */    
-    protected TestContext getContext() {
-    	return context;
-    }
-
     /**
      * Gets the TestConfigElementEngine used by this visitor.
      * 
@@ -83,7 +71,7 @@ public abstract class AbstractTestConfigElementVisitor<A> implements TestConfigV
 	/**
 	 * 
 	 */
-	protected void checkExecutionController() {
+	protected void checkExecutionController(TestContext context) {
 		ExecutionController executionController = context.getExecutionController();
 
 		if (executionController != null) {

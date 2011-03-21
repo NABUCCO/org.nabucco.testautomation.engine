@@ -75,7 +75,7 @@ public class TestConfigElementEngineImpl implements TestConfigElementEngine {
         // A TestConfigElement must be defined by a SchemaElement
         if (schema == null) {
             String error = "No SchemaElement defined for TestConfigElement '"
-                + testConfigElement.getElementKey().getValue()
+                + testConfigElement.getIdentificationKey().getValue()
                 + "'";
             parentResult.setErrorMessage(error);
             throw new TestEngineException(error);
@@ -94,17 +94,18 @@ public class TestConfigElementEngineImpl implements TestConfigElementEngine {
 		TestResult result = TestResultHelper.createTestResult(schema);
         result.setTestConfigElementId(testConfigElement.getId());
         result.setTestConfigElementName(testConfigElement.getName());
-        result.setTestConfigElementKey(testConfigElement.getElementKey());
+        result.setTestConfigElementKey(testConfigElement.getIdentificationKey());
         result.setName(testConfigElement.getName().getValue() + RESULT);
         result.setLevel(schema.getLevel());
         result.setSchemaElementId(schema.getId());
+        result.setBrandType(testConfigElement.getBrandType());
         
         // Check skipping
         if (schema.getSkipable() != null && schema.getSkipable().getValue()) {
            
         	if (testConfigElement.getSkip() != null && testConfigElement.getSkip().getValue()) {
                 skip(testConfigElement, result);
-                logger.info("TestConfigElement '" + testConfigElement.getElementKey().getValue() + "' skipped");
+                logger.info("TestConfigElement '" + testConfigElement.getIdentificationKey().getValue() + "' skipped");
                 return result;
             }
         }
@@ -119,6 +120,9 @@ public class TestConfigElementEngineImpl implements TestConfigElementEngine {
             }
         	
         	if (testConfigElement.getSkip() != null && testConfigElement.getSkip().getValue()) {
+        		skip(testConfigElement, result);
+        		// reset skip-attribute
+        		testConfigElement.setSkip(Boolean.FALSE);
         		TestResultHelper.addTestResult(result, parentResult);
         		return result;
         	}
@@ -178,16 +182,16 @@ public class TestConfigElementEngineImpl implements TestConfigElementEngine {
         	TestConfigElementStatusType status = resultMap.get(dependency.getId());
         	
         	if (status == null) {
-        		logger.error("No Status found for TestConfigElement '" + dependency.getElementKey().getValue() + "'");
+        		logger.error("No Status found for TestConfigElement '" + dependency.getIdentificationKey().getValue() + "'");
         	}
         	
             if (status != TestConfigElementStatusType.PASSED) {
                     testConfigElement.setSkip(Boolean.TRUE);
                     result.setStatus(TestConfigElementStatusType.SKIPPED);
                     String message = "Dependency-check failed: '"
-                            + testConfigElement.getElementKey().getValue()
+                            + testConfigElement.getIdentificationKey().getValue()
                             + "' SKIPPED because '"
-                            + dependency.getElementKey().getValue()
+                            + dependency.getIdentificationKey().getValue()
                             + "' " + status;
                     result.setMessage(message);
                     logger.info(message);
@@ -218,7 +222,7 @@ public class TestConfigElementEngineImpl implements TestConfigElementEngine {
             testConfigElement.setSkip(Boolean.TRUE);
             result.setStatus(TestConfigElementStatusType.SKIPPED);
             String message = "Dependency-check failed: '"
-                    + testConfigElement.getElementKey().getValue()
+                    + testConfigElement.getIdentificationKey().getValue()
                     + "' SKIPPED because '"
                     + precedingResult.getTestConfigElementKey().getValue()
                     + "' " + status;

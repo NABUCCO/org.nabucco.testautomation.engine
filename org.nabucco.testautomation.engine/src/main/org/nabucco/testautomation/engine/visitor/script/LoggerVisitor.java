@@ -125,7 +125,7 @@ public class LoggerVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
 				String str = PropertyHelper.toString(prop);
 				
 				if (str == null) {
-					str = prop.toString();
+					str = "null";
 				}
 				logMessage.append(str + SPACE);
 			}

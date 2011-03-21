@@ -22,6 +22,7 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.Action;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Assertion;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.BreakLoop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Condition;
+import org.nabucco.testautomation.script.facade.datatype.dictionary.EmbeddedTestScript;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Execution;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Foreach;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
@@ -38,15 +39,14 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.TextMessage;
  */
 public interface TestDictionaryVisitor<A> {
     
-	/**
-	 * Visits a {@link TestScript}.
-	 * 
-	 * @param script
-	 * @param argument
-	 * @param subTestScript
-	 * @throws TestScriptException
-	 */
-    public void visit(TestScript script, A argument, boolean subTestScript) throws TestScriptException;
+    /**
+     * Visits an {@link EmbeddedTestScript}.
+     * 
+     * @param script
+     * @param argument
+     * @throws TestScriptException
+     */
+    public void visit(EmbeddedTestScript script, A argument) throws TestScriptException;
     
     /**
 	 * Visits a {@link TestScript}.

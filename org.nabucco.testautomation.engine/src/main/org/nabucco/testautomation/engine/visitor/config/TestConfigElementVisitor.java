@@ -46,21 +46,22 @@ public class TestConfigElementVisitor extends AbstractTestConfigElementVisitor<T
     
     private final TestResultStatusVisitor resultVisitor = new TestResultStatusVisitor();
 
-    protected TestConfigElementVisitor(TestContext context,
-            TestConfigElementEngine testConfigElementEngine) {
-        super(context, testConfigElementEngine);
+    protected TestConfigElementVisitor(TestConfigElementEngine testConfigElementEngine) {
+        super(testConfigElementEngine);
     }
 
     @Override
-    public void visit(TestConfiguration testConfiguration, TestResult argument) {
+    public void visit(TestConfiguration testConfiguration, TestContext context, TestResult argument) {
         throw new UnsupportedOperationException(
                 "Should not visit a TestConfiguration from within a TestConfigElementVisitor");
     }
 
     @Override
-    public void visit(TestConfigElement testConfigElement, TestResult argument) {
+    public void visit(TestConfigElement testConfigElement, TestContext context, TestResult argument) {
         
-    	logger.debug("Visting TestConfigElement '" + testConfigElement.getName().getValue() + "'");
+    	logger.debug("Visting TestConfigElement '", testConfigElement.getName().getValue(), "'");
+    	context = this.checkCloneContext(testConfigElement, context);
+    	context.setCurrentTestConfigElement(testConfigElement);
         long startTime = System.currentTimeMillis();
         
         try {
@@ -69,11 +70,11 @@ public class TestConfigElementVisitor extends AbstractTestConfigElementVisitor<T
         	
         	// Execute TestConfigElement
             TestResult result = getTestConfigElementEngine().executeTestConfigElement(
-                    testConfigElement, getContext(), argument);
+                    testConfigElement, context, argument);
             
             // Do not execute children if skipped
             if (result.getStatus() != TestConfigElementStatusType.SKIPPED) {
-            	super.visit(testConfigElement, result);
+            	super.visit(testConfigElement, context, result);
             }
             
             long endTime = System.currentTimeMillis();
@@ -100,20 +101,22 @@ public class TestConfigElementVisitor extends AbstractTestConfigElementVisitor<T
 		}
     }
     
-    public void visit(TestConfigElement testConfigElement, TestConfigurationResult testConfigurationResult) {
+    public void visit(TestConfigElement testConfigElement, TestContext context, TestConfigurationResult testConfigurationResult) {
         
-    	logger.debug("Visting TestConfigElement '" + testConfigElement.getName().getValue() + "'");
+    	logger.debug("Visting TestConfigElement '", testConfigElement.getName().getValue(), "'");
+    	context = this.checkCloneContext(testConfigElement, context);
+    	context.setCurrentTestConfigElement(testConfigElement);
     	long startTime = System.currentTimeMillis();
     	
         try {
         	// Execute TestConfigElement
             TestResult result = getTestConfigElementEngine().executeTestConfigElement(
-                    testConfigElement, getContext(), null);
+                    testConfigElement, context, null);
             
             // Do not execute children if skipped
             if (result.getStatus() != TestConfigElementStatusType.SKIPPED) {
             	TestResultHelper.addTestResult(result, testConfigurationResult);
-            	super.visit(testConfigElement, result);
+            	super.visit(testConfigElement, context, result);
             }
             
             long endTime = System.currentTimeMillis();
@@ -133,6 +136,21 @@ public class TestConfigElementVisitor extends AbstractTestConfigElementVisitor<T
         	finish(testConfigurationResult, startTime);
             logger.error(ex.getMessage());
 		}
+    }
+    
+    private TestContext checkCloneContext(TestConfigElement testConfigElement, TestContext context) {
+    	
+		if (testConfigElement.getSchemaElement() != null
+				&& testConfigElement.getSchemaElement().getCloneContext() != null
+				&& testConfigElement.getSchemaElement().getCloneContext()
+						.getValue() != null
+				&& testConfigElement.getSchemaElement() != null
+				&& testConfigElement.getSchemaElement().getCloneContext() != null
+				&& testConfigElement.getSchemaElement().getCloneContext()
+						.getValue().booleanValue()) {
+			return context.dublicate();
+		}
+		return context;
     }
     
     private void finish(TestResult argument, long startTime) {

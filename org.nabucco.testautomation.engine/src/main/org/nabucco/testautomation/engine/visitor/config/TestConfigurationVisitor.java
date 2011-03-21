@@ -37,8 +37,8 @@ import org.nabucco.testautomation.result.facade.datatype.TestConfigurationResult
 public class TestConfigurationVisitor extends
         AbstractTestConfigElementVisitor<TestConfigurationResult> {
 
-    public TestConfigurationVisitor(TestContext context, TestConfigElementEngine testStepEngine) {
-        super(context, testStepEngine);
+    public TestConfigurationVisitor(TestConfigElementEngine testStepEngine) {
+        super(testStepEngine);
     }
 
     /**
@@ -47,7 +47,7 @@ public class TestConfigurationVisitor extends
      * @param testResult
      */
     @Override
-    public void visit(TestConfiguration testConfiguration,
+    public void visit(TestConfiguration testConfiguration, TestContext context, 
             TestConfigurationResult testConfigurationResult) {
     	
     	if (testConfiguration.getEnvironmentType() != null
@@ -61,7 +61,7 @@ public class TestConfigurationVisitor extends
 			environment.setName(TestContext.ENVIRONMENT);
 			environment.setValue(testConfiguration.getEnvironmentType().getName()
 					.getValue());
-			getContext().put(environment);
+			context.put(environment);
 		}
     	
     	if (testConfiguration.getReleaseType() != null
@@ -75,14 +75,14 @@ public class TestConfigurationVisitor extends
 			release.setName(TestContext.RELEASE);
 			release.setValue(testConfiguration.getReleaseType().getName()
 					.getValue());
-			getContext().put(release);
+			context.put(release);
 		}
     	
     	List<TestConfigElementContainer> testConfigElementList = testConfiguration.getTestConfigElementList();
     	Collections.sort(testConfigElementList, new TestConfigElementSorter());
     	
     	for (TestConfigElementContainer testConfigElement : testConfigElementList) {
-    		visit(testConfigElement.getElement(), testConfigurationResult);
+    		visit(testConfigElement.getElement(), context, testConfigurationResult);
     	}
     }
 
@@ -90,10 +90,10 @@ public class TestConfigurationVisitor extends
      * {@inheritDoc}
      */
     @Override
-    public void visit(TestConfigElement testConfigElement,
+    public void visit(TestConfigElement testConfigElement, TestContext context, 
             TestConfigurationResult testConfigurationResult) {
-        new TestConfigElementVisitor(getContext().dublicate(), getTestConfigElementEngine()).visit(
-                testConfigElement, testConfigurationResult);
+        new TestConfigElementVisitor(getTestConfigElementEngine()).visit(
+                testConfigElement, context, testConfigurationResult);
     }
 
 }

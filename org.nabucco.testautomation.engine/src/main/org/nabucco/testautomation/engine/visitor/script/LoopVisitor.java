@@ -22,7 +22,6 @@ import org.nabucco.testautomation.engine.base.logging.NBCTestLoggingFactory;
 import org.nabucco.testautomation.engine.exception.BreakLoopException;
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
-
 import org.nabucco.testautomation.facade.datatype.property.IntegerProperty;
 import org.nabucco.testautomation.result.facade.datatype.TestScriptResult;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Assertion;
@@ -34,7 +33,6 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Logger;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Loop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.PropertyAction;
-import org.nabucco.testautomation.script.facade.datatype.dictionary.TestScript;
 
 /**
  * 
@@ -94,8 +92,13 @@ public class LoopVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
 		
 		// Index of loop
 		IntegerProperty index = new IntegerProperty();
-		index.setName(loop.getName().getValue() + "_index");
-		getContext().put(index);
+
+		if (loop.getIndexName() != null
+				&& loop.getIndexName().getValue() != null
+				&& !loop.getIndexName().getValue().equals("")) {
+			index.setName(loop.getIndexName().getValue());
+			getContext().put(index);
+		}
 		
 		for (int i = 0; i < iterations; i++) {
 			logger.info("Loop iteration " + i);
@@ -130,8 +133,13 @@ public class LoopVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
 		
 		// Index of loop
 		IntegerProperty index = new IntegerProperty();
-		index.setName(loop.getName().getValue() + "_index");
-		getContext().put(index);
+
+		if (loop.getIndexName() != null
+				&& loop.getIndexName().getValue() != null
+				&& !loop.getIndexName().getValue().equals("")) {
+			index.setName(loop.getIndexName().getValue());
+			getContext().put(index);
+		}
 		
 		while(!timeout(end) && counter <= 999) {
 			logger.debug("Next while iteration");
@@ -146,6 +154,7 @@ public class LoopVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
 			wait(waitTime);
 			counter++;
 		}
+		getContext().remove(index);
 		logger.debug("Timeout: MaxDuration exceeded");		
 	}
 	
@@ -229,12 +238,4 @@ public class LoopVisitor extends AbstractTestScriptVisitor<TestScriptResult> {
     	new PropertyActionVisitor(getContext(), getTestScriptEngine()).visit(propertyAction, argument);
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void visit(TestScript testScript, TestScriptResult argument, boolean subTestScript) throws TestScriptException {
-    	new SubTestScriptVisitor(getContext(), getTestScriptEngine()).visit(testScript, argument);
-    }
-	
 }

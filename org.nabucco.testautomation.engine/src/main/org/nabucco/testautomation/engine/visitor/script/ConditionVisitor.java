@@ -22,7 +22,6 @@ import org.nabucco.testautomation.engine.base.logging.NBCTestLoggingFactory;
 import org.nabucco.testautomation.engine.base.util.PropertyHelper;
 import org.nabucco.testautomation.engine.exception.TestScriptException;
 import org.nabucco.testautomation.engine.sub.TestScriptEngine;
-
 import org.nabucco.testautomation.facade.datatype.property.BooleanProperty;
 import org.nabucco.testautomation.facade.datatype.property.DateProperty;
 import org.nabucco.testautomation.facade.datatype.property.IntegerProperty;
@@ -37,7 +36,6 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Logger;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Loop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.PropertyAction;
-import org.nabucco.testautomation.script.facade.datatype.dictionary.TestScript;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.type.ConditionType;
 
 /**
@@ -93,13 +91,17 @@ public class ConditionVisitor extends AbstractTestScriptVisitor<TestScriptResult
 		sb.append(conditionType);
         
         switch (conditionType) {
-        	
+        
+        // conditions requiring a value
         case EQUALS:
         case NOT_EQUALS:
         case GT:
         case GTE:
         case LT:
-        case LTE: { 
+        case LTE:
+        case STARTS_WITH:
+        case ENDS_WITH:
+        case CONTAINS: { 
         	
 			if (condition.getValueRef() != null
 					&& condition.getValueRef().getValue() != null
@@ -178,6 +180,15 @@ public class ConditionVisitor extends AbstractTestScriptVisitor<TestScriptResult
         	break;
         case NOT_NULL:
         	conditionFulfilled = checkNotNull(prop);
+        	break;
+        case STARTS_WITH:
+        	conditionFulfilled = checkStartsWith(prop, value);
+        	break;
+        case ENDS_WITH:
+        	conditionFulfilled = checkEndsWith(prop, value);
+        	break;
+        case CONTAINS:
+        	conditionFulfilled = checkContains(prop, value);
         	break;
         default:
             logger.error("ConditionType not supported: " + conditionType);
@@ -393,6 +404,33 @@ public class ConditionVisitor extends AbstractTestScriptVisitor<TestScriptResult
 		return false;
 	}
 	
+	private boolean checkStartsWith(Property prop, String value) {
+		
+	    if (prop == null || value == null) {
+            return false;
+        } 
+		
+	    return PropertyHelper.toString(prop).startsWith(value);
+	}
+	
+	private boolean checkEndsWith(Property prop, String value) {
+		
+	    if (prop == null || value == null) {
+	    	return false;
+        } 
+
+	    return PropertyHelper.toString(prop).endsWith(value);
+	}
+	
+	private boolean checkContains(Property prop, String value) {
+		
+	    if (prop == null || value == null) {
+	    	return false;
+        } 
+
+	    return PropertyHelper.toString(prop).contains(value);
+	}
+	
 	/**
      * {@inheritDoc}
      */
@@ -447,14 +485,6 @@ public class ConditionVisitor extends AbstractTestScriptVisitor<TestScriptResult
     @Override
     public void visit(PropertyAction propertyAction, TestScriptResult argument) throws TestScriptException {
     	new PropertyActionVisitor(getContext(), getTestScriptEngine()).visit(propertyAction, argument);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void visit(TestScript testScript, TestScriptResult argument, boolean subTestScript) throws TestScriptException {
-    	new SubTestScriptVisitor(getContext(), getTestScriptEngine()).visit(testScript, argument);
     }
     
     public boolean getResult() {

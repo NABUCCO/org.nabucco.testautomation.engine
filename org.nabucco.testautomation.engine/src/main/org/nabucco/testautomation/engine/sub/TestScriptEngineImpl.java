@@ -99,7 +99,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
 	    
 		TestScriptResult testScriptResult = TestResultHelper.createTestScriptResult();
 	    testScriptResult.setTestScriptName(testScript.getName());
-	    testScriptResult.setTestScriptKey(testScript.getTestScriptKey());
+	    testScriptResult.setTestScriptKey(testScript.getIdentificationKey());
 	    testScriptResult.setElementId(testScript.getId());
 	    testResult.getTestScriptResultList().add(testScriptResult);
 	    
@@ -126,6 +126,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
 			endTime = System.currentTimeMillis();
 			testScriptResult.setEndTime(new Date(endTime));
 			testScriptResult.setDuration(endTime - startTime);
+			testScriptResult.setErrorMessage(ex.getMessage());
 			testScriptResult.setStatus(TestScriptStatusType.FAILED);
 			throw ex;
 		} catch (InterruptionException ex) {
@@ -163,7 +164,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
 				visitor.visit(testResult);
 				
 				if (testResult.getStatus() == TestConfigElementStatusType.FAILED) {
-					logger.info("TestScript '", testScript.getTestScriptKey().getValue(), "' failed");
+					logger.info("TestScript '", testScript.getIdentificationKey().getValue(), "' failed");
 					break scriptLoop;
 				}
 			} catch (TestExecutionAssertionException ex) {
@@ -187,7 +188,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
 			} catch (TestScriptException ex) {
 			    // Error in TestScript
 				String error = "Execution of TestScript '"
-						+ testScript.getTestScriptKey().getValue() + "' failed. Cause: " + ex.getMessage();
+						+ testScript.getIdentificationKey().getValue() + "' failed. Cause: " + ex.getMessage();
 				testResult.setErrorMessage(error);
                 testResult.setStatus(TestConfigElementStatusType.FAILED);
                 logger.error(error);
@@ -195,7 +196,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
             } catch (InterruptionException ex) {
             	// TestScript interrupted
             	String error = "Execution of TestScript '"
-						+ testScript.getTestScriptKey().getValue() + "' aborted";
+						+ testScript.getIdentificationKey().getValue() + "' aborted";
             	testResult.setErrorMessage(error);
                 testResult.setStatus(TestConfigElementStatusType.FAILED);
                 logger.error(error);
@@ -203,7 +204,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
             } catch (Exception ex) {
 			    // Unexpected error
 				String error = "Execution of TestScript '"
-						+ testScript.getTestScriptKey().getValue() + "' failed. Cause: " + ex.toString();
+						+ testScript.getIdentificationKey().getValue() + "' failed. Cause: " + ex.toString();
 				testResult.setErrorMessage(error);
                 testResult.setStatus(TestConfigElementStatusType.FAILED);
                 logger.fatal(ex, error);
@@ -229,7 +230,7 @@ public class TestScriptEngineImpl implements TestScriptEngine {
 		try {
 			resolvePropertyRefs(actionProperties, context);
 			SubEngineInvoker subEngineInvoker = new SubEngineInvoker(action.getMetadata(), context, actionProperties,
-					action.getAction());
+					action.getActionCode());
 			subEngineInvoker.invoke();
 			response = subEngineInvoker.getResponse();
 			response.setElementId(action.getId());
