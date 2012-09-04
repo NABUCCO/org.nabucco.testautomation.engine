@@ -1,30 +1,31 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.nabucco.testautomation.engine.execution.job;
 
 import java.util.Collection;
 import java.util.Date;
 
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.testautomation.config.facade.datatype.TestConfiguration;
 import org.nabucco.testautomation.engine.base.client.ClientInteraction;
 import org.nabucco.testautomation.engine.base.context.TestContext;
 import org.nabucco.testautomation.engine.base.exception.InterruptionException;
-import org.nabucco.testautomation.engine.base.logging.NBCTestLogger;
-import org.nabucco.testautomation.engine.base.logging.NBCTestLoggingFactory;
 import org.nabucco.testautomation.engine.base.util.TestResultHelper;
 import org.nabucco.testautomation.engine.proxy.ProxyEngine;
 import org.nabucco.testautomation.engine.proxy.exception.ProxyConfigurationException;
@@ -33,12 +34,10 @@ import org.nabucco.testautomation.engine.proxy.pool.ProxyPoolFactory;
 import org.nabucco.testautomation.engine.sub.TestConfigElementEngineImpl;
 import org.nabucco.testautomation.engine.visitor.config.TestConfigurationVisitor;
 import org.nabucco.testautomation.engine.visitor.result.TestResultFinalizationVisitor;
-
-import org.nabucco.testautomation.config.facade.datatype.TestConfiguration;
-import org.nabucco.testautomation.facade.datatype.engine.TestExecutionInfo;
-import org.nabucco.testautomation.facade.datatype.engine.proxy.ProxyConfiguration;
 import org.nabucco.testautomation.result.facade.datatype.TestConfigurationResult;
 import org.nabucco.testautomation.result.facade.datatype.status.TestConfigurationStatusType;
+import org.nabucco.testautomation.settings.facade.datatype.engine.TestExecutionInfo;
+import org.nabucco.testautomation.settings.facade.datatype.engine.proxy.ProxyConfiguration;
 
 /**
  * TestConfigurationExecutionJob
@@ -48,14 +47,11 @@ import org.nabucco.testautomation.result.facade.datatype.status.TestConfiguratio
  */
 public class TestConfigurationExecutionJob extends TestExecutionJob {
 
-	/**
-	 * 
-	 */
 	private static final String RESULT_SUFFIX = "-Result";
 
 	private static final long serialVersionUID = 1L;
 
-	private static final NBCTestLogger logger = NBCTestLoggingFactory
+    private final NabuccoLogger logger = NabuccoLoggingFactory
 			.getInstance().getLogger(TestConfigurationExecutionJob.class);
 
 	private TestConfiguration testConfiguration;

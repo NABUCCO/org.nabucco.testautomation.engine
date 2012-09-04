@@ -1,19 +1,19 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.nabucco.testautomation.engine.visitor.script;
 
 import java.util.List;
@@ -29,7 +29,7 @@ import org.nabucco.testautomation.script.facade.datatype.dictionary.Condition;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.EmbeddedTestScript;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Execution;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Foreach;
-import org.nabucco.testautomation.script.facade.datatype.dictionary.Lock;
+import org.nabucco.testautomation.script.facade.datatype.dictionary.Function;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Logger;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.Loop;
 import org.nabucco.testautomation.script.facade.datatype.dictionary.PropertyAction;
@@ -94,15 +94,6 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
      * {@inheritDoc}
      */
     @Override
-    public void visit(Lock lock, A argument) throws TestScriptException {
-    	checkExecutionController();
-        visit(lock.getTestScriptElementList(), argument);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void visit(Execution execution, A argument) throws TestScriptException {
     	checkExecutionController();
         visit(execution.getTestScriptElementList(), argument);
@@ -157,6 +148,14 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
     public void visit(Foreach foreach, A argument) throws TestScriptException {
         checkExecutionController();
         visit(foreach.getTestScriptElementList(), argument);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void visit(Function function, A argument) throws TestScriptException {
+        checkExecutionController();
     }
     
     /**
@@ -232,12 +231,12 @@ public abstract class AbstractTestScriptVisitor<A> implements TestDictionaryVisi
                 visit((Assertion) element, argument);
                 break;
             }
-            case LOCK: {
-                visit((Lock) element, argument);
-                break;
-            }
             case FOREACH: {
                 visit((Foreach) element, argument);
+                break;
+            }
+            case FUNCTION: {
+                visit((Function) element, argument);
                 break;
             }
             case BREAK_LOOP: {

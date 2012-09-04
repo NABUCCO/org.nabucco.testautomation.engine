@@ -1,19 +1,19 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.nabucco.testautomation.engine.semaphore;
 
 import java.util.Collections;
@@ -22,10 +22,9 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.nabucco.testautomation.engine.base.logging.NBCTestLogger;
-import org.nabucco.testautomation.engine.base.logging.NBCTestLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.testautomation.engine.exception.SynchronizationSemaphoreException;
-
 
 /**
  * SynchronizationSemaphoreMap
@@ -35,7 +34,7 @@ import org.nabucco.testautomation.engine.exception.SynchronizationSemaphoreExcep
  */
 public class SynchronizationSemaphoreMap {
 
-    private static final NBCTestLogger logger = NBCTestLoggingFactory.getInstance().getLogger(
+    private final NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
             SynchronizationSemaphoreMap.class);
 
     private static SynchronizationSemaphoreMap instance;
@@ -52,7 +51,7 @@ public class SynchronizationSemaphoreMap {
      * @return the instance
      */
     public final static synchronized SynchronizationSemaphoreMap getInstance() {
-        
+
         if (instance == null) {
             instance = new SynchronizationSemaphoreMap();
         }
@@ -81,25 +80,19 @@ public class SynchronizationSemaphoreMap {
 
         try {
             Semaphore sem = this.semaphoreMap.get(id);
-            logger.debug("Accuiring Semaphore for id '", id, "' at ", ""
-                    + System.currentTimeMillis(), ", timeout=" + timeout, " ms");
+            logger.debug("Accuiring Semaphore for id '", id, "' at ", "" + System.currentTimeMillis(), ", timeout="
+                    + timeout, " ms");
 
             // try to acquire lock for this id
             if (sem.tryAcquire(timeout, TimeUnit.MILLISECONDS)) {
-                logger.debug("Accuired Semaphore for id '", id, "' at "
-                        + System.currentTimeMillis());
+                logger.debug("Accuired Semaphore for id '", id, "' at " + System.currentTimeMillis());
             } else {
                 // false returned -> waiting time elapsed
                 throw new SynchronizationSemaphoreException("Timeout of "
-                        + timeout
-                        + " ms elapsed while acquiring semaphore for id '"
-                        + id
-                        + "'");
+                        + timeout + " ms elapsed while acquiring semaphore for id '" + id + "'");
             }
         } catch (InterruptedException e) {
-            String msg = "Caught an InterruptedException while waiting for lock with id '"
-                    + id
-                    + "'";
+            String msg = "Caught an InterruptedException while waiting for lock with id '" + id + "'";
             logger.error(e, msg);
             throw new SynchronizationSemaphoreException(msg, e);
         }
@@ -108,7 +101,8 @@ public class SynchronizationSemaphoreMap {
     /**
      * Releases the lock for the given id.
      * 
-     * @param id the id for the lock
+     * @param id
+     *            the id for the lock
      */
     public final void releaseLock(String id) {
         Semaphore sem = this.semaphoreMap.get(id);

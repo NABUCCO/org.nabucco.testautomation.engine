@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="out/ide/intf" path="src/intf"/>
+	<classpathentry kind="src" output="out/ide/main" path="src/main"/>
+	<classpathentry kind="src" output="out/ide/test" path="src/test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.framework.base.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.framework.common.dynamiccode.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.engine.base.jar" sourcepath="/org.nabucco.testautomation.engine.base"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.engine.proxy.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.result.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.schema.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.script.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.config.facade.jar"/>
+	<classpathentry kind="lib" path="lib/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.property.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.testautomation.settings.facade.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.common.scripting.jar"/>
+	<classpathentry kind="lib" path="lib/org.nabucco.framework.support.scripting.facade.jar"/>
+	<classpathentry kind="output" path="out"/>
+</classpath>
